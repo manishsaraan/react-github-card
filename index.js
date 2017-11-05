@@ -3,12 +3,12 @@ import ReactDOM from 'react-dom';
 import { Router, Route, browserHistory } from 'react-router';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './assets/styles.css';
-
+import axios from 'axios';
 
 const Card  = (props) => {
   return(
     <div style={{margin:'1em'}}>
-      <img width="75" src={props.avatar} />
+      <img width="75" src={props.avatar_url} />
       <div style={{display:'inline-block',marginLeft:'10px'}}>
         <div style={{fontSize:'20px',fontWeight:'bold'}}>{props.name}</div>
         <div>{props.company}</div>
@@ -21,7 +21,12 @@ class Form extends React.Component {
 	state = {userName : ''};
 	handleSubmit = (event) => {
 		event.preventDefault();
-		console.log('Event: Form submit;',this.state.userName);
+		let input = this.state.userName;
+		axios.get(`https://api.github.com/users/${input}`)
+		 .then(resp => {
+		 	   this.props.onSubmit(resp.data); 
+               this.setState({userName : ''});
+		 });	
 	}
 	 render(){
 	 	return(
@@ -41,31 +46,23 @@ class Form extends React.Component {
 const CardList = (props) => {
 	return (
           <div>          
-           {props.cards.map(card => <Card {...card}/>)}
+           {props.cards.map(card => <Card {...card} key={card.id}/>)}
           </div>
 		);
 };
 class App extends React.Component{
+	addNewCard = (cardInfo) => {
+         this.setState(prevState => ({
+         	 cards : prevState.cards.concat(cardInfo)
+         }))
+	};
 	state = {
-        cards:[{
-				 name : "manishsaraan",
-				 company : "N/A" ,
-				 avatar : "https://avatars2.githubusercontent.com/u/19797340?v=4"
-			            },
-			            {
-				 name : "manishsaraan",
-				 company : "N/A" ,
-				 avatar : "https://avatars2.githubusercontent.com/u/19797340?v=4"
-			            },{
-				 name : "manishsaraan",
-				 company : "N/A" ,
-				 avatar : "https://avatars2.githubusercontent.com/u/19797340?v=4"
-            }]
+        cards:[]
 	}
 	 render(){
 	 	return(
 	 		<div>
-              <Form/>
+              <Form onSubmit = {this.addNewCard}/>
               <CardList cards = {this.state.cards}/>
             </div>
 	 		);
