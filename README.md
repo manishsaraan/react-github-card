@@ -1,1 +1,1 @@
-# react-github-card
+#React Github Card
